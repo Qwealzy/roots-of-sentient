@@ -35,7 +35,7 @@ h1 {
 }
 
 .atom-card {
-  margin-top: calc(2rem + var(--atom-offset, 0px));
+  margin-top: 2rem;
   padding: 0;
   display: flex;
   justify-content: center;
