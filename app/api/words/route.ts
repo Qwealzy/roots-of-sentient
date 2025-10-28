@@ -205,7 +205,7 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error("Supabase insert hatası", error);
-    return NextResponse.json({ error: "Kelime kaydedilemedi" }, { status: 500 });
+    return NextResponse.json({ error: "Word could not be saved" }, { status: 500 });
   }
 
   let publicUrl: string | null = null;
@@ -263,7 +263,7 @@ export async function DELETE(request: Request) {
 
   if (error) {
     console.error("Supabase silme hatası", error);
-    return NextResponse.json({ error: "Kelime silinemedi" }, { status: 500 });
+    return NextResponse.json({ error: "Word could not be removed" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });
