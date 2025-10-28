@@ -36,11 +36,7 @@ h1 {
 
 .atom-card {
   margin-top: 1.75rem;
-  background: rgba(15, 23, 42, 0.88);
-  border-radius: 28px;
-  padding: clamp(2rem, 5vw, 3.5rem);
-  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.45);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  padding: 0;
   display: flex;
   justify-content: center;
 }
@@ -112,6 +108,13 @@ button:not(:disabled):hover {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
+.entry-form__file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
 .entry-form__field--file {
   position: relative;
   padding-bottom: 0.4rem;
@@ -131,12 +134,16 @@ button:not(:disabled):hover {
   margin-top: 0.15rem;
 }
 
-.entry-form__actions {
+.entry-form__submit {
+  white-space: nowrap;
+  padding: 0.9rem 1.4rem;
+}
+
+.entry-form__status-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem 1.5rem;
   justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
 }
 
 .entry-form__status {
@@ -222,22 +229,28 @@ button:not(:disabled):hover {
   pointer-events: auto;
 }
 
-.word-node__avatar-row {
-  display: flex;
+.word-node__avatar-wrapper {
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  width: 64px;
+  height: 64px;
 }
 
 .word-node__username {
   font-size: 0.75rem;
   opacity: 0.9;
   letter-spacing: 0.02em;
+  text-align: center;
+  width: 100%;
 }
 
 .word-node__term {
   font-size: 1.05rem;
   letter-spacing: 0.03em;
+  text-align: center;
+  width: 100%;
 }
 
 .word-avatar {
@@ -275,7 +288,13 @@ button:not(:disabled):hover {
   box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   pointer-events: auto;
-  flex-shrink: 0;
+}
+
+.word-node__avatar-wrapper .delete-button {
+  position: absolute;
+  right: -16px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .delete-button:hover {
@@ -285,7 +304,7 @@ button:not(:disabled):hover {
 
 @media (max-width: 768px) {
   .atom-card {
-    padding: 1.5rem;
+    padding: 0;
   }
 
   .atom-scene {
@@ -304,5 +323,13 @@ button:not(:disabled):hover {
 
   .entry-form__grid {
     grid-template-columns: 1fr;
+  }
+
+  .entry-form__file-row {
+    grid-template-columns: 1fr;
+  }
+
+  .entry-form__submit {
+    width: 100%;
   }
 }
