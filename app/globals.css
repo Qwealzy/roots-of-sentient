@@ -201,6 +201,7 @@ button:not(:disabled):hover {
   border-radius: 50%;
   border: 1px dashed rgba(148, 163, 184, 0.25);
   transition: border-color 0.3s ease;
+  pointer-events: none;
 }
 
 .orbit-layer::after {
