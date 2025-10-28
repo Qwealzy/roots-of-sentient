@@ -35,7 +35,7 @@ h1 {
 }
 
 .atom-card {
-  margin-top: 2rem;
+  margin-top: 1.75rem;
   padding: 0;
   display: flex;
   justify-content: center;
@@ -112,25 +112,19 @@ button:not(:disabled):hover {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.75rem;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .entry-form__field--file {
   position: relative;
   padding-bottom: 0;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
-.entry-form__field-label {
-  white-space: nowrap;
-}
-
-.entry-form__field--file input {
-  flex: 1 1 auto;
-  min-width: 0;
+.entry-form__hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.2rem;
 }
 
 .entry-form__file {
@@ -140,15 +134,10 @@ button:not(:disabled):hover {
   margin-top: 0.15rem;
 }
 
-.entry-form__field--file .entry-form__file {
-  flex-basis: 100%;
-}
-
 .entry-form__submit {
   white-space: nowrap;
   padding: 0.9rem 1.4rem;
-  align-self: center;
-  margin-top: 0.35rem;
+  align-self: flex-start;
 }
 
 .entry-form__status-row {
@@ -202,7 +191,6 @@ button:not(:disabled):hover {
   border-radius: 50%;
   border: 1px dashed rgba(148, 163, 184, 0.25);
   transition: border-color 0.3s ease;
-  pointer-events: none;
 }
 
 .orbit-layer::after {
