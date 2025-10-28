@@ -24,7 +24,6 @@ type PositionedWord = WordRecord & {
 const BASE_LAYER_CAPACITY = 4;
 const BASE_LAYER_RADIUS = 140;
 const LAYER_RADIUS_STEP = 130;
-const MAX_SCENE_RADIUS = 360;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 
@@ -122,33 +121,15 @@ function calculatePositionedWords(words: WordRecord[]): {
     return a.slotIndex - b.slotIndex;
   });
 
-  let layerRadii = Array.from(
+  const layerRadii = Array.from(
     new Set(positioned.map((word) => word.layerIndex))
   )
     .sort((a, b) => a - b)
     .map((layerIndex) => BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP);
 
-  const maxRadius =
-    layerRadii.length > 0
-      ? Math.max(...layerRadii)
-      : BASE_LAYER_RADIUS;
-  const scale = maxRadius > MAX_SCENE_RADIUS ? MAX_SCENE_RADIUS / maxRadius : 1;
-
-  if (scale !== 1) {
-    layerRadii = layerRadii.map((radius) => radius * scale);
-  }
-
-  const scaledPositioned =
-    scale === 1
-      ? positioned
-      : positioned.map((word) => ({
-          ...word,
-          radius: word.radius * scale
-        }));
-
   return {
     layerRadii,
-    positioned: scaledPositioned
+    positioned
   };
 }
 
@@ -298,7 +279,7 @@ export default function HomePage() {
           </label>
           <div className="entry-form__file-row">
             <label className="entry-form__field entry-form__field--file">
-              <span className="entry-form__field-label">Profile Picture (Optional)</span>
+              Profile Picture (Optional)
               <input
                 ref={fileInputRef}
                 type="file"
@@ -315,6 +296,7 @@ export default function HomePage() {
                   setAvatarFile(file);
                 }}
               />
+              <span className="entry-form__hint">Max 5MB. JPG, PNG, or GIF recommended.</span>
               {avatarFile && (
                 <span className="entry-form__file">Selected file: {avatarFile.name}</span>
               )}
