@@ -22,8 +22,8 @@ type PositionedWord = WordRecord & {
 };
 
 const BASE_LAYER_CAPACITY = 4;
-const BASE_LAYER_RADIUS = 120;
-const LAYER_RADIUS_STEP = 110;
+const BASE_LAYER_RADIUS = 140;
+const LAYER_RADIUS_STEP = 130;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 
@@ -330,6 +330,16 @@ export default function HomePage() {
                 transform: `translate(-50%, -50%) rotate(${word.angle}deg) translate(${word.radius}px) rotate(-${word.angle}deg)`
               }}
             >
+              {word.client_token === clientToken && (
+                <button
+                  type="button"
+                  className="delete-button"
+                  aria-label="Kelimeyi sil"
+                  onClick={() => handleDelete(word.id)}
+                >
+                  ×
+                </button>
+              )}
               <div className="word-node__content">
                 <span className="word-node__username">{word.username}</span>
                 {word.avatar_url ? (
@@ -345,15 +355,6 @@ export default function HomePage() {
                 )}
                 <strong className="word-node__term">{word.term}</strong>
               </div>
-              {word.client_token === clientToken && (
-                <button
-                  type="button"
-                  className="delete-button"
-                  onClick={() => handleDelete(word.id)}
-                >
-                  Sil
-                </button>
-              )}
             </div>
           ))}
         </div>
