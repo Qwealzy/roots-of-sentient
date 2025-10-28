@@ -43,15 +43,12 @@ function calculatePositionedWords(words: WordRecord[]): {
     const radius = BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP;
     layerRadii.push(radius);
 
-    const segmentArc = layerIndex === 0 ? 360 : 180;
-    const centerAngle = layerIndex === 0 ? 0 : 180;
     const count = layerWords.length;
-    const spacing = count > 1 ? segmentArc / count : 0;
-    const baseOffset =
-      count > 1 ? centerAngle - ((count - 1) * spacing) / 2 : centerAngle;
+    const spacing = count > 0 ? 360 / count : 0;
+    const baseOffset = count > 0 ? -90 : 0;
 
     layerWords.forEach((word, index) => {
-      const angle = count > 1 ? baseOffset + spacing * index : centerAngle;
+      const angle = count > 0 ? baseOffset + spacing * index : 0;
 
       positioned.push({
         ...word,
