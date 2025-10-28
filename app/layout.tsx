@@ -3,7 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Roots of Sentient",
-  description: "Share the Roots of Sentient word universe with Supabase."
+  description: "Share the Roots of Sentient word universe with Supabase.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
