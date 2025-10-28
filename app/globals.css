@@ -241,9 +241,9 @@ button:not(:disabled):hover {
 }
 
 .word-avatar {
-  width: 46px;
-  height: 46px;
-  border-radius: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
   border: 1px solid rgba(59, 130, 246, 0.5);
   object-fit: cover;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
@@ -252,6 +252,7 @@ button:not(:disabled):hover {
 .word-avatar--placeholder {
   display: grid;
   place-items: center;
+  border-radius: 50%;
   background: rgba(59, 130, 246, 0.25);
   font-size: 0.9rem;
   font-weight: 700;
