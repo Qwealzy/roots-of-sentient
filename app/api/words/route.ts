@@ -5,7 +5,7 @@ import { supabaseServerClient } from "@/lib/supabaseClient";
 const TABLE = "words";
 const AVATAR_BUCKET = "avatars";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const BASE_LAYER_CAPACITY = 3;
+const BASE_LAYER_CAPACITY = 2;
 
 type PositionEntry = {
   id?: string;
