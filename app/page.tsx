@@ -330,29 +330,31 @@ export default function HomePage() {
                 transform: `translate(-50%, -50%) rotate(${word.angle}deg) translate(${word.radius}px) rotate(-${word.angle}deg)`
               }}
             >
-              {word.client_token === clientToken && (
-                <button
-                  type="button"
-                  className="delete-button"
-                  aria-label="Kelimeyi sil"
-                  onClick={() => handleDelete(word.id)}
-                >
-                  ×
-                </button>
-              )}
               <div className="word-node__content">
                 <span className="word-node__username">{word.username}</span>
-                {word.avatar_url ? (
-                  <img
-                    className="word-avatar"
-                    src={word.avatar_url}
-                    alt={`${word.username} avatar`}
-                  />
-                ) : (
-                  <div className="word-avatar word-avatar--placeholder">
-                    {word.username.slice(0, 1).toUpperCase()}
-                  </div>
-                )}
+                <div className="word-node__avatar-row">
+                  {word.avatar_url ? (
+                    <img
+                      className="word-avatar"
+                      src={word.avatar_url}
+                      alt={`${word.username} avatar`}
+                    />
+                  ) : (
+                    <div className="word-avatar word-avatar--placeholder">
+                      {word.username.slice(0, 1).toUpperCase()}
+                    </div>
+                  )}
+                  {word.client_token === clientToken && (
+                    <button
+                      type="button"
+                      className="delete-button"
+                      aria-label="Kelimeyi sil"
+                      onClick={() => handleDelete(word.id)}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
                 <strong className="word-node__term">{word.term}</strong>
               </div>
             </div>
