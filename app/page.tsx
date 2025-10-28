@@ -24,6 +24,7 @@ type PositionedWord = WordRecord & {
 const BASE_LAYER_CAPACITY = 4;
 const BASE_LAYER_RADIUS = 140;
 const LAYER_RADIUS_STEP = 130;
+const MAX_SCENE_RADIUS = 360;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 
@@ -121,15 +122,33 @@ function calculatePositionedWords(words: WordRecord[]): {
     return a.slotIndex - b.slotIndex;
   });
 
-  const layerRadii = Array.from(
+  let layerRadii = Array.from(
     new Set(positioned.map((word) => word.layerIndex))
   )
     .sort((a, b) => a - b)
     .map((layerIndex) => BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP);
 
+  const maxRadius =
+    layerRadii.length > 0
+      ? Math.max(...layerRadii)
+      : BASE_LAYER_RADIUS;
+  const scale = maxRadius > MAX_SCENE_RADIUS ? MAX_SCENE_RADIUS / maxRadius : 1;
+
+  if (scale !== 1) {
+    layerRadii = layerRadii.map((radius) => radius * scale);
+  }
+
+  const scaledPositioned =
+    scale === 1
+      ? positioned
+      : positioned.map((word) => ({
+          ...word,
+          radius: word.radius * scale
+        }));
+
   return {
     layerRadii,
-    positioned
+    positioned: scaledPositioned
   };
 }
 
