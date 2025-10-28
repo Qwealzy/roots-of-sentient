@@ -236,6 +236,7 @@ button:not(:disabled):hover {
   justify-content: center;
   width: 64px;
   height: 64px;
+  padding-left: 28px;
 }
 
 .word-node__username {
@@ -292,7 +293,7 @@ button:not(:disabled):hover {
 
 .word-node__avatar-wrapper .delete-button {
   position: absolute;
-  right: -16px;
+  left: -16px;
   top: 50%;
   transform: translateY(-50%);
 }
@@ -326,10 +327,6 @@ button:not(:disabled):hover {
   }
 
   .entry-form__file-row {
-    grid-template-columns: 1fr;
-  }
-
-  .entry-form__submit {
-    width: 100%;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
