@@ -167,12 +167,12 @@ export default function HomePage() {
         const response = await fetch("/api/words");
         const data = await response.json();
         if (!response.ok) {
-          throw new Error(data?.error || "Veriler yüklenemedi");
+          throw new Error(data?.error || "Unable to load entries");
         }
         setWords(data.words || []);
       } catch (err) {
         console.error(err);
-        setError("Kelime evrenine erişilemedi. Lütfen tekrar deneyin.");
+        setError("The word universe is unreachable. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -189,11 +189,11 @@ export default function HomePage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.term.trim() || !form.username.trim()) {
-      setError("Kelime ve kullanıcı adı zorunludur.");
+      setError("Word and username are required.");
       return;
     }
     if (!clientToken) {
-      setError("Tarayıcı anahtarı oluşturulurken lütfen bekleyin.");
+      setError("Please wait while a browser token is prepared.");
       return;
     }
     try {
@@ -213,7 +213,7 @@ export default function HomePage() {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data?.error || "Kelime eklenemedi");
+        throw new Error(data?.error || "Word could not be added");
       }
       setWords((prev) => [...prev, data.word]);
       setForm({ term: "", username: "" });
@@ -223,7 +223,7 @@ export default function HomePage() {
       }
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Beklenmedik bir hata oluştu");
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setSubmitting(false);
     }
@@ -231,7 +231,7 @@ export default function HomePage() {
 
   async function handleDelete(id: string) {
     if (!clientToken) {
-      setError("Silme işlemi için tarayıcı anahtarına ulaşılamadı.");
+      setError("No browser token found for deletion.");
       return;
     }
     try {
@@ -241,12 +241,12 @@ export default function HomePage() {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data?.error || "Kelime silinemedi");
+        throw new Error(data?.error || "Word could not be deleted");
       }
       setWords((prev) => prev.filter((word) => word.id !== id));
     } catch (err) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "Beklenmedik bir hata oluştu");
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     }
   }
 
@@ -256,30 +256,30 @@ export default function HomePage() {
       <form className="entry-form" onSubmit={handleSubmit}>
         <div className="entry-form__grid">
           <label className="entry-form__field">
-            Kelime
+            Word
             <input
               value={form.term}
               onChange={(event) => setForm((prev) => ({ ...prev, term: event.target.value }))}
-              placeholder="Kelimenizi yazın"
+              placeholder="Enter your word"
               maxLength={30}
               required
             />
           </label>
           <label className="entry-form__field">
-            Kullanıcı adı
+            Twitter Username
             <input
               value={form.username}
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, username: event.target.value }))
               }
-              placeholder="Size nasıl hitap edelim?"
+              placeholder="How should we credit you?"
               maxLength={30}
               required
             />
           </label>
           <div className="entry-form__file-row">
             <label className="entry-form__field entry-form__field--file">
-              Avatar yükle (opsiyonel)
+              Profile Picture (Optional)
               <input
                 ref={fileInputRef}
                 type="file"
@@ -287,7 +287,7 @@ export default function HomePage() {
                 onChange={(event) => {
                   const file = event.target.files?.[0] ?? null;
                   if (file && file.size > MAX_FILE_SIZE) {
-                    setError("Avatar dosyası 5MB'den küçük olmalıdır.");
+                    setError("Profile pictures must be under 5MB.");
                     event.target.value = "";
                     setAvatarFile(null);
                     return;
@@ -296,9 +296,9 @@ export default function HomePage() {
                   setAvatarFile(file);
                 }}
               />
-              <span className="entry-form__hint">Maksimum 5MB. JPG, PNG veya GIF önerilir.</span>
+              <span className="entry-form__hint">Max 5MB. JPG, PNG, or GIF recommended.</span>
               {avatarFile && (
-                <span className="entry-form__file">Seçilen dosya: {avatarFile.name}</span>
+                <span className="entry-form__file">Selected file: {avatarFile.name}</span>
               )}
             </label>
             <button
@@ -306,13 +306,13 @@ export default function HomePage() {
               type="submit"
               disabled={submitting || !clientToken}
             >
-              {submitting ? "Ekleniyor..." : "Kelimeyi ekle"}
+              {submitting ? "Adding..." : "Add Word"}
             </button>
           </div>
         </div>
         {(loading || error) && (
           <div className="entry-form__status-row">
-            {loading && <p className="entry-form__status">Kelime evreni yükleniyor...</p>}
+            {loading && <p className="entry-form__status">Loading the word universe...</p>}
             {error && (
               <p className="entry-form__status entry-form__status--error">{error}</p>
             )}
@@ -343,6 +343,16 @@ export default function HomePage() {
               <div className="word-node__content">
                 <span className="word-node__username">{word.username}</span>
                 <div className="word-node__avatar-wrapper">
+                  {word.client_token === clientToken && (
+                    <button
+                      type="button"
+                      className="delete-button"
+                      aria-label="Delete word"
+                      onClick={() => handleDelete(word.id)}
+                    >
+                      ×
+                    </button>
+                  )}
                   {word.avatar_url ? (
                     <img
                       className="word-avatar"
@@ -353,16 +363,6 @@ export default function HomePage() {
                     <div className="word-avatar word-avatar--placeholder">
                       {word.username.slice(0, 1).toUpperCase()}
                     </div>
-                  )}
-                  {word.client_token === clientToken && (
-                    <button
-                      type="button"
-                      className="delete-button"
-                      aria-label="Kelimeyi sil"
-                      onClick={() => handleDelete(word.id)}
-                    >
-                      ×
-                    </button>
                   )}
                 </div>
                 <strong className="word-node__term">{word.term}</strong>
