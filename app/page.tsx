@@ -322,7 +322,7 @@ export default function HomePage() {
               key={word.id}
               className="word-node"
               style={{
-                transform: `rotate(${word.angle}deg) translate(${word.radius}px) rotate(-${word.angle}deg)`
+                transform: `translate(-50%, -50%) rotate(${word.angle}deg) translate(${word.radius}px) rotate(-${word.angle}deg)`
               }}
             >
               <div className="word-node__content">
