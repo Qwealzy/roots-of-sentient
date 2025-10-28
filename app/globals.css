@@ -112,12 +112,12 @@ button:not(:disabled):hover {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.75rem;
-  align-items: end;
+  align-items: flex-start;
 }
 
 .entry-form__field--file {
   position: relative;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0;
 }
 
 .entry-form__hint {
@@ -137,6 +137,7 @@ button:not(:disabled):hover {
 .entry-form__submit {
   white-space: nowrap;
   padding: 0.9rem 1.4rem;
+  align-self: flex-start;
 }
 
 .entry-form__status-row {
@@ -236,7 +237,6 @@ button:not(:disabled):hover {
   justify-content: center;
   width: 64px;
   height: 64px;
-  padding-left: 28px;
 }
 
 .word-node__username {
@@ -261,6 +261,8 @@ button:not(:disabled):hover {
   border: 1px solid rgba(59, 130, 246, 0.5);
   object-fit: cover;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
 }
 
 .word-avatar--placeholder {
@@ -293,7 +295,7 @@ button:not(:disabled):hover {
 
 .word-node__avatar-wrapper .delete-button {
   position: absolute;
-  left: -16px;
+  left: -22px;
   top: 50%;
   transform: translateY(-50%);
 }
