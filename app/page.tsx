@@ -20,26 +20,31 @@ type PositionedWord = WordRecord & {
 };
 
 const BASE_LAYER_CAPACITY = 3;
+const BASE_LAYER_RADIUS = 120;
+const LAYER_RADIUS_STEP = 110;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 function calculatePositionedWords(words: WordRecord[]): {
-  layers: number;
+  layerRadii: number[];
   positioned: PositionedWord[];
 } {
   const positioned: PositionedWord[] = [];
   const remaining = [...words];
   let layerIndex = 0;
   let currentCapacity = BASE_LAYER_CAPACITY;
+  const layerRadii: number[] = [];
 
   while (remaining.length > 0) {
     const layerWords = remaining.splice(0, currentCapacity);
     const capacity = currentCapacity;
     const spacing = 360 / capacity;
     const baseOffset = layerIndex === 0 ? 0 : spacing / 2;
+    const radius = BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP;
+
+    layerRadii.push(radius);
 
     layerWords.forEach((word, index) => {
       const angle = baseOffset + spacing * index;
-      const radius = 90 + layerIndex * 70;
       positioned.push({
         ...word,
         layerIndex,
@@ -53,7 +58,7 @@ function calculatePositionedWords(words: WordRecord[]): {
   }
 
   return {
-    layers: layerIndex,
+    layerRadii,
     positioned
   };
 }
@@ -106,7 +111,10 @@ export default function HomePage() {
     loadWords();
   }, []);
 
-  const { layers, positioned } = useMemo(() => calculatePositionedWords(words), [words]);
+  const { layerRadii, positioned } = useMemo(
+    () => calculatePositionedWords(words),
+    [words]
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -175,16 +183,77 @@ export default function HomePage() {
   return (
     <main>
       <h1>Roots of Sentient</h1>
+      <form className="entry-form" onSubmit={handleSubmit}>
+        <h2>Kelime Evrenine Katıl</h2>
+        <p className="entry-form__lead">
+          Kelimenizi, isminizi ve isteğe bağlı avatarınızı ekleyin; atom modeli yeni katkıları hemen
+          göstersin.
+        </p>
+        <div className="entry-form__grid">
+          <label className="entry-form__field">
+            Kelime
+            <input
+              value={form.term}
+              onChange={(event) => setForm((prev) => ({ ...prev, term: event.target.value }))}
+              placeholder="Kelimenizi yazın"
+              maxLength={30}
+              required
+            />
+          </label>
+          <label className="entry-form__field">
+            Kullanıcı adı
+            <input
+              value={form.username}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, username: event.target.value }))
+              }
+              placeholder="Size nasıl hitap edelim?"
+              maxLength={30}
+              required
+            />
+          </label>
+          <label className="entry-form__field entry-form__field--file">
+            Avatar yükle (opsiyonel)
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                if (file && file.size > MAX_FILE_SIZE) {
+                  setError("Avatar dosyası 5MB'den küçük olmalıdır.");
+                  event.target.value = "";
+                  setAvatarFile(null);
+                  return;
+                }
+                setError(null);
+                setAvatarFile(file);
+              }}
+            />
+            <span className="entry-form__hint">Maksimum 5MB. JPG, PNG veya GIF önerilir.</span>
+            {avatarFile && (
+              <span className="entry-form__file">Seçilen dosya: {avatarFile.name}</span>
+            )}
+          </label>
+        </div>
+        <div className="entry-form__actions">
+          <button type="submit" disabled={submitting || !clientToken}>
+            {submitting ? "Ekleniyor..." : "Kelimeyi ekle"}
+          </button>
+          {loading && <p className="entry-form__status">Kelime evreni yükleniyor...</p>}
+          {error && <p className="entry-form__status entry-form__status--error">{error}</p>}
+        </div>
+      </form>
       <section className="atom-card">
         <div className="atom-scene">
           <div className="central-core">Sentient</div>
-          {Array.from({ length: layers }).map((_, index) => (
+          {layerRadii.map((radius, index) => (
             <div
               key={`layer-${index}`}
               className="orbit-layer"
               style={{
-                width: `${180 + index * 140}px`,
-                height: `${180 + index * 140}px`
+                width: `${radius * 2}px`,
+                height: `${radius * 2}px`
               }}
             />
           ))}
@@ -223,67 +292,6 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-        <form className="form-section" onSubmit={handleSubmit}>
-          <h2>Kelime Evrenine Katıl</h2>
-          <p>
-            Yeni bir kelime ekleyin ve kimin eklediğini gösteren profil avatarı ile atomun
-            katmanlarında yerini alsın.
-          </p>
-          <label>
-            Kelime
-            <input
-              value={form.term}
-              onChange={(event) => setForm((prev) => ({ ...prev, term: event.target.value }))}
-              placeholder="Kelimenizi yazın"
-              maxLength={30}
-              required
-            />
-          </label>
-          <label>
-            Kullanıcı adı
-            <input
-              value={form.username}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, username: event.target.value }))
-              }
-              placeholder="Size nasıl hitap edelim?"
-              maxLength={30}
-              required
-            />
-          </label>
-          <label>
-            Avatar yükle (opsiyonel)
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(event) => {
-                const file = event.target.files?.[0] ?? null;
-                if (file && file.size > MAX_FILE_SIZE) {
-                  setError("Avatar dosyası 5MB'den küçük olmalıdır.");
-                  event.target.value = "";
-                  setAvatarFile(null);
-                  return;
-                }
-                setError(null);
-                setAvatarFile(file);
-              }}
-            />
-            <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
-              Maksimum 5MB. JPG, PNG veya GIF dosyaları önerilir.
-            </span>
-            {avatarFile && (
-              <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
-                Seçilen dosya: {avatarFile.name}
-              </span>
-            )}
-          </label>
-          <button type="submit" disabled={submitting || !clientToken}>
-            {submitting ? "Ekleniyor..." : "Kelimeyi ekle"}
-          </button>
-          {loading && <p>Kelime evreni yükleniyor...</p>}
-          {error && <p style={{ color: "#f87171" }}>{error}</p>}
-        </form>
       </section>
     </main>
   );
