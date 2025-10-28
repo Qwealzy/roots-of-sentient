@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type WordRecord = {
   id: string;
@@ -52,7 +52,6 @@ function findOpenSlot(occupied: Map<number, Set<number>>) {
 function calculatePositionedWords(words: WordRecord[]): {
   layerRadii: number[];
   positioned: PositionedWord[];
-  maxRadius: number;
 } {
   const occupied = new Map<number, Set<number>>();
   const positioned: PositionedWord[] = [];
@@ -129,12 +128,11 @@ function calculatePositionedWords(words: WordRecord[]): {
     .sort((a, b) => a - b)
     .map((layerIndex) => BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP);
 
-  const rawMaxRadius =
+  const maxRadius =
     layerRadii.length > 0
       ? Math.max(...layerRadii)
       : BASE_LAYER_RADIUS;
-  const scale =
-    rawMaxRadius > MAX_SCENE_RADIUS ? MAX_SCENE_RADIUS / rawMaxRadius : 1;
+  const scale = maxRadius > MAX_SCENE_RADIUS ? MAX_SCENE_RADIUS / maxRadius : 1;
 
   if (scale !== 1) {
     layerRadii = layerRadii.map((radius) => radius * scale);
@@ -148,15 +146,9 @@ function calculatePositionedWords(words: WordRecord[]): {
           radius: word.radius * scale
         }));
 
-  const maxRadius =
-    layerRadii.length > 0
-      ? Math.max(...layerRadii)
-      : BASE_LAYER_RADIUS;
-
   return {
     layerRadii,
-    positioned: scaledPositioned,
-    maxRadius
+    positioned: scaledPositioned
   };
 }
 
@@ -208,15 +200,9 @@ export default function HomePage() {
     loadWords();
   }, []);
 
-  const { layerRadii, positioned, maxRadius } = useMemo(
+  const { layerRadii, positioned } = useMemo(
     () => calculatePositionedWords(words),
     [words]
-  );
-
-  const atomOffset = Math.max(0, maxRadius - BASE_LAYER_RADIUS);
-  const atomCardStyle = useMemo(
-    () => ({ "--atom-offset": `${atomOffset}px` } as CSSProperties),
-    [atomOffset]
   );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -351,7 +337,7 @@ export default function HomePage() {
           </div>
         )}
       </form>
-      <section className="atom-card" style={atomCardStyle}>
+      <section className="atom-card">
         <div className="atom-scene">
           <div className="central-core">Sentient</div>
           {layerRadii.map((radius, index) => (
