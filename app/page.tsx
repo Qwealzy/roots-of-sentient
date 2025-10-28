@@ -31,8 +31,12 @@ function calculatePositionedWords(words: WordRecord[]): {
 
   while (remaining.length > 0) {
     const layerWords = remaining.splice(0, currentCapacity);
+    const capacity = currentCapacity;
+    const spacing = 360 / capacity;
+    const baseOffset = layerIndex === 0 ? 0 : spacing / 2;
+
     layerWords.forEach((word, index) => {
-      const angle = (360 / layerWords.length) * index;
+      const angle = baseOffset + spacing * index;
       const radius = 90 + layerIndex * 70;
       positioned.push({
         ...word,
