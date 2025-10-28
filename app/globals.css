@@ -150,7 +150,7 @@ button:not(:disabled):hover {
 
 .atom-scene {
   position: relative;
-  width: min(680px, 100%);
+  width: min(820px, 100%);
   aspect-ratio: 1 / 1;
   margin: 0 auto;
 }
@@ -203,7 +203,7 @@ button:not(:disabled):hover {
   flex-direction: column;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.55rem 0.85rem;
+  padding: 1.05rem 1.1rem 0.9rem;
   background: rgba(15, 23, 42, 0.75);
   border-radius: 20px;
   border: 1px solid rgba(148, 163, 184, 0.28);
@@ -249,17 +249,29 @@ button:not(:disabled):hover {
   color: rgba(226, 232, 240, 0.85);
 }
 
-.word-node button {
-  margin-top: 0.3rem;
+.delete-button {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.85);
+  color: #f8fafc;
+  border: 1px solid rgba(248, 113, 113, 0.65);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(239, 68, 68, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.delete-button {
-  background: rgba(239, 68, 68, 0.15);
-  color: rgba(248, 113, 113, 0.95);
-  border: 1px solid rgba(248, 113, 113, 0.35);
-  padding: 0.25rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.7rem;
+.delete-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.45);
 }
 
 @media (max-width: 768px) {
