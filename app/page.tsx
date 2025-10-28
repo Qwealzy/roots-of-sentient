@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type WordRecord = {
   id: string;
@@ -24,7 +24,6 @@ type PositionedWord = WordRecord & {
 const BASE_LAYER_CAPACITY = 4;
 const BASE_LAYER_RADIUS = 140;
 const LAYER_RADIUS_STEP = 130;
-const MAX_SCENE_RADIUS = 360;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 
@@ -52,7 +51,6 @@ function findOpenSlot(occupied: Map<number, Set<number>>) {
 function calculatePositionedWords(words: WordRecord[]): {
   layerRadii: number[];
   positioned: PositionedWord[];
-  maxRadius: number;
 } {
   const occupied = new Map<number, Set<number>>();
   const positioned: PositionedWord[] = [];
@@ -123,40 +121,15 @@ function calculatePositionedWords(words: WordRecord[]): {
     return a.slotIndex - b.slotIndex;
   });
 
-  let layerRadii = Array.from(
+  const layerRadii = Array.from(
     new Set(positioned.map((word) => word.layerIndex))
   )
     .sort((a, b) => a - b)
     .map((layerIndex) => BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP);
 
-  const rawMaxRadius =
-    layerRadii.length > 0
-      ? Math.max(...layerRadii)
-      : BASE_LAYER_RADIUS;
-  const scale =
-    rawMaxRadius > MAX_SCENE_RADIUS ? MAX_SCENE_RADIUS / rawMaxRadius : 1;
-
-  if (scale !== 1) {
-    layerRadii = layerRadii.map((radius) => radius * scale);
-  }
-
-  const scaledPositioned =
-    scale === 1
-      ? positioned
-      : positioned.map((word) => ({
-          ...word,
-          radius: word.radius * scale
-        }));
-
-  const maxRadius =
-    layerRadii.length > 0
-      ? Math.max(...layerRadii)
-      : BASE_LAYER_RADIUS;
-
   return {
     layerRadii,
-    positioned: scaledPositioned,
-    maxRadius
+    positioned
   };
 }
 
@@ -208,15 +181,9 @@ export default function HomePage() {
     loadWords();
   }, []);
 
-  const { layerRadii, positioned, maxRadius } = useMemo(
+  const { layerRadii, positioned } = useMemo(
     () => calculatePositionedWords(words),
     [words]
-  );
-
-  const atomOffset = Math.max(0, maxRadius - BASE_LAYER_RADIUS);
-  const atomCardStyle = useMemo(
-    () => ({ "--atom-offset": `${atomOffset}px` } as CSSProperties),
-    [atomOffset]
   );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -310,38 +277,36 @@ export default function HomePage() {
               required
             />
           </label>
-          <div className="entry-form__file-cluster">
-            <div className="entry-form__file-row">
-              <label className="entry-form__field entry-form__field--file">
-                <span className="entry-form__field-label">Profile Picture (Optional)</span>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0] ?? null;
-                    if (file && file.size > MAX_FILE_SIZE) {
-                      setError("Profile pictures must be under 5MB.");
-                      event.target.value = "";
-                      setAvatarFile(null);
-                      return;
-                    }
-                    setError(null);
-                    setAvatarFile(file);
-                  }}
-                />
-              </label>
-              <button
-                className="entry-form__submit"
-                type="submit"
-                disabled={submitting || !clientToken}
-              >
-                {submitting ? "Adding..." : "Add Word"}
-              </button>
-            </div>
-            {avatarFile && (
-              <span className="entry-form__file">Selected file: {avatarFile.name}</span>
-            )}
+          <div className="entry-form__file-row">
+            <label className="entry-form__field entry-form__field--file">
+              <span className="entry-form__field-label">Profile Picture (Optional)</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  if (file && file.size > MAX_FILE_SIZE) {
+                    setError("Profile pictures must be under 5MB.");
+                    event.target.value = "";
+                    setAvatarFile(null);
+                    return;
+                  }
+                  setError(null);
+                  setAvatarFile(file);
+                }}
+              />
+              {avatarFile && (
+                <span className="entry-form__file">Selected file: {avatarFile.name}</span>
+              )}
+            </label>
+            <button
+              className="entry-form__submit"
+              type="submit"
+              disabled={submitting || !clientToken}
+            >
+              {submitting ? "Adding..." : "Add Word"}
+            </button>
           </div>
         </div>
         {(loading || error) && (
@@ -353,7 +318,7 @@ export default function HomePage() {
           </div>
         )}
       </form>
-      <section className="atom-card" style={atomCardStyle}>
+      <section className="atom-card">
         <div className="atom-scene">
           <div className="central-core">Sentient</div>
           {layerRadii.map((radius, index) => (
