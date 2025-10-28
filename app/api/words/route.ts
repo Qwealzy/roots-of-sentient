@@ -5,11 +5,68 @@ import { supabaseServerClient } from "@/lib/supabaseClient";
 const TABLE = "words";
 const AVATAR_BUCKET = "avatars";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const BASE_LAYER_CAPACITY = 3;
+
+type PositionEntry = {
+  id?: string;
+  created_at?: string;
+  layer_index: number | null;
+  slot_index: number | null;
+};
+
+function getLayerCapacity(layerIndex: number) {
+  return BASE_LAYER_CAPACITY * 2 ** layerIndex;
+}
+
+function buildOccupiedMap(entries: PositionEntry[]) {
+  const occupied = new Map<number, Set<number>>();
+
+  for (const entry of entries) {
+    if (
+      typeof entry.layer_index === "number" &&
+      typeof entry.slot_index === "number"
+    ) {
+      if (!occupied.has(entry.layer_index)) {
+        occupied.set(entry.layer_index, new Set());
+      }
+      occupied.get(entry.layer_index)!.add(entry.slot_index);
+    }
+  }
+
+  return occupied;
+}
+
+function claimNextSlot(occupied: Map<number, Set<number>>) {
+  let layerIndex = 0;
+
+  while (true) {
+    const capacity = getLayerCapacity(layerIndex);
+
+    if (!occupied.has(layerIndex)) {
+      occupied.set(layerIndex, new Set());
+    }
+
+    const used = occupied.get(layerIndex)!;
+
+    for (let slotIndex = 0; slotIndex < capacity; slotIndex += 1) {
+      if (!used.has(slotIndex)) {
+        used.add(slotIndex);
+        return { layerIndex, slotIndex };
+      }
+    }
+
+    layerIndex += 1;
+  }
+}
 
 export async function GET() {
   const { data, error } = await supabaseServerClient
     .from(TABLE)
-    .select("id, term, username, avatar_url, client_token, created_at")
+    .select(
+      "id, term, username, avatar_url, client_token, created_at, layer_index, slot_index"
+    )
+    .order("layer_index", { ascending: true, nullsFirst: true })
+    .order("slot_index", { ascending: true, nullsFirst: true })
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -17,7 +74,39 @@ export async function GET() {
     return NextResponse.json({ error: "Veriler alınamadı" }, { status: 500 });
   }
 
-  const words = (data ?? []).map((word) => {
+  const rows = (data ?? []).map((word) => ({ ...word }));
+  const occupied = buildOccupiedMap(rows);
+  const updates: Array<{ id: string; layer_index: number; slot_index: number }> = [];
+
+  const unassigned = rows.filter(
+    (word) =>
+      typeof word.layer_index !== "number" || typeof word.slot_index !== "number"
+  );
+
+  unassigned
+    .sort((a, b) =>
+      (a.created_at ?? "").localeCompare(b.created_at ?? "")
+    )
+    .forEach((word) => {
+      const { layerIndex, slotIndex } = claimNextSlot(occupied);
+      word.layer_index = layerIndex;
+      word.slot_index = slotIndex;
+      if (word.id) {
+        updates.push({ id: word.id, layer_index: layerIndex, slot_index: slotIndex });
+      }
+    });
+
+  if (updates.length > 0) {
+    const { error: updateError } = await supabaseServerClient
+      .from(TABLE)
+      .upsert(updates, { onConflict: "id" });
+
+    if (updateError) {
+      console.error("Supabase pozisyon güncelleme hatası", updateError);
+    }
+  }
+
+  const words = rows.map((word) => {
     if (!word.avatar_url || word.avatar_url.startsWith("http")) {
       return word;
     }
@@ -82,6 +171,21 @@ export async function POST(request: Request) {
     avatarPath = path;
   }
 
+  const { data: existingPositions, error: existingError } = await supabaseServerClient
+    .from(TABLE)
+    .select("layer_index, slot_index");
+
+  if (existingError) {
+    console.error("Supabase mevcut pozisyonları çekerken hata", existingError);
+    return NextResponse.json(
+      { error: "Pozisyon bilgileri alınamadı" },
+      { status: 500 }
+    );
+  }
+
+  const occupied = buildOccupiedMap(existingPositions ?? []);
+  const { layerIndex, slotIndex } = claimNextSlot(occupied);
+
   const { data, error } = await supabaseServerClient
     .from(TABLE)
     .insert([
@@ -89,10 +193,14 @@ export async function POST(request: Request) {
         term,
         username,
         avatar_url: avatarPath,
-        client_token: clientToken
+        client_token: clientToken,
+        layer_index: layerIndex,
+        slot_index: slotIndex
       }
     ])
-    .select("id, term, username, avatar_url, client_token, created_at")
+    .select(
+      "id, term, username, avatar_url, client_token, created_at, layer_index, slot_index"
+    )
     .single();
 
   if (error) {
