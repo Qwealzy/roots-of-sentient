@@ -21,7 +21,7 @@ type PositionedWord = WordRecord & {
   radius: number;
 };
 
-const BASE_LAYER_CAPACITY = 3;
+const BASE_LAYER_CAPACITY = 2;
 const BASE_LAYER_RADIUS = 120;
 const LAYER_RADIUS_STEP = 110;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
