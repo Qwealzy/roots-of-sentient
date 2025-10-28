@@ -35,30 +35,18 @@ h1 {
 }
 
 .atom-card {
-  margin-top: 2rem;
-  background: rgba(15, 23, 42, 0.85);
-  border-radius: 24px;
-  padding: 2rem;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  display: grid;
-  gap: 2rem;
-}
-
-@media (min-width: 1024px) {
-  .atom-card {
-    grid-template-columns: 3fr 2fr;
-    align-items: center;
-  }
-}
-
-.form-section {
+  margin-top: 1.75rem;
+  background: rgba(15, 23, 42, 0.88);
+  border-radius: 28px;
+  padding: clamp(2rem, 5vw, 3.5rem);
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  justify-content: center;
 }
 
-label {
+label,
+.entry-form__field {
   display: flex;
   flex-direction: column;
   font-size: 0.95rem;
@@ -105,9 +93,78 @@ button:not(:disabled):hover {
   box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3);
 }
 
+.entry-form {
+  margin: 1.5rem auto 0;
+  background: rgba(15, 23, 42, 0.75);
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: clamp(1.2rem, 3vw, 1.8rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 880px;
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.38);
+}
+
+.entry-form h2 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+  text-align: center;
+  letter-spacing: 0.06em;
+}
+
+.entry-form__lead {
+  margin: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.entry-form__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.entry-form__field--file {
+  position: relative;
+  padding-bottom: 0.4rem;
+}
+
+.entry-form__hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+}
+
+.entry-form__file {
+  display: block;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-top: 0.15rem;
+}
+
+.entry-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  justify-content: center;
+}
+
+.entry-form__status {
+  font-size: 0.85rem;
+  color: #cbd5f5;
+}
+
+.entry-form__status--error {
+  color: #f87171;
+}
+
 .atom-scene {
   position: relative;
-  width: min(520px, 100%);
+  width: min(680px, 100%);
   aspect-ratio: 1 / 1;
   margin: 0 auto;
 }
@@ -159,13 +216,13 @@ button:not(:disabled):hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0.9rem;
-  background: rgba(15, 23, 42, 0.78);
-  border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(6px);
+  gap: 0.45rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(15, 23, 42, 0.75);
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
   text-align: center;
   min-width: 120px;
 }
@@ -179,18 +236,18 @@ button:not(:disabled):hover {
 
 .word-node__username {
   font-size: 0.75rem;
-  opacity: 0.85;
+  opacity: 0.9;
   letter-spacing: 0.02em;
 }
 
 .word-node__term {
-  font-size: 1rem;
+  font-size: 1.05rem;
   letter-spacing: 0.03em;
 }
 
 .word-avatar {
-  width: 40px;
-  height: 40px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   border: 1px solid rgba(59, 130, 246, 0.5);
   object-fit: cover;
@@ -221,16 +278,24 @@ button:not(:disabled):hover {
 
 @media (max-width: 768px) {
   .atom-card {
-    grid-template-columns: 1fr;
+    padding: 1.5rem;
   }
 
   .atom-scene {
-    width: min(400px, 100%);
+    width: min(420px, 100%);
   }
 
   .central-core {
     width: 90px;
     height: 90px;
     font-size: 1rem;
+  }
+
+  .entry-form {
+    padding: 1rem;
+  }
+
+  .entry-form__grid {
+    grid-template-columns: 1fr;
   }
 }
