@@ -36,15 +36,23 @@ function calculatePositionedWords(words: WordRecord[]): {
 
   while (remaining.length > 0) {
     const layerWords = remaining.splice(0, currentCapacity);
-    const capacity = currentCapacity;
-    const spacing = 360 / capacity;
-    const baseOffset = layerIndex === 0 ? 0 : spacing / 2;
-    const radius = BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP;
+    if (layerWords.length === 0) {
+      break;
+    }
 
+    const radius = BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP;
     layerRadii.push(radius);
 
+    const segmentArc = layerIndex === 0 ? 360 : 180;
+    const centerAngle = layerIndex === 0 ? 0 : 180;
+    const count = layerWords.length;
+    const spacing = count > 1 ? segmentArc / count : 0;
+    const baseOffset =
+      count > 1 ? centerAngle - ((count - 1) * spacing) / 2 : centerAngle;
+
     layerWords.forEach((word, index) => {
-      const angle = baseOffset + spacing * index;
+      const angle = count > 1 ? baseOffset + spacing * index : centerAngle;
+
       positioned.push({
         ...word,
         layerIndex,
@@ -184,11 +192,6 @@ export default function HomePage() {
     <main>
       <h1>Roots of Sentient</h1>
       <form className="entry-form" onSubmit={handleSubmit}>
-        <h2>Kelime Evrenine Katıl</h2>
-        <p className="entry-form__lead">
-          Kelimenizi, isminizi ve isteğe bağlı avatarınızı ekleyin; atom modeli yeni katkıları hemen
-          göstersin.
-        </p>
         <div className="entry-form__grid">
           <label className="entry-form__field">
             Kelime
