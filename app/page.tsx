@@ -279,7 +279,7 @@ export default function HomePage() {
           </label>
           <div className="entry-form__file-row">
             <label className="entry-form__field entry-form__field--file">
-              Profile Picture (Optional)
+              <span className="entry-form__field-label">Profile Picture (Optional)</span>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -296,7 +296,6 @@ export default function HomePage() {
                   setAvatarFile(file);
                 }}
               />
-              <span className="entry-form__hint">Max 5MB. JPG, PNG, or GIF recommended.</span>
               {avatarFile && (
                 <span className="entry-form__file">Selected file: {avatarFile.name}</span>
               )}
