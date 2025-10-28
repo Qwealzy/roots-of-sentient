@@ -5,7 +5,7 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
   throw new Error(
-    "Supabase environment variables eksik. Lütfen SUPABASE_URL ve SUPABASE_SERVICE_ROLE_KEY değerlerini .env.local dosyasına ekleyin."
+    "Supabase environment variables are missing. Please add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your .env.local file."
   );
 }
 
