@@ -277,37 +277,47 @@ export default function HomePage() {
               required
             />
           </label>
-          <label className="entry-form__field entry-form__field--file">
-            Avatar yükle (opsiyonel)
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(event) => {
-                const file = event.target.files?.[0] ?? null;
-                if (file && file.size > MAX_FILE_SIZE) {
-                  setError("Avatar dosyası 5MB'den küçük olmalıdır.");
-                  event.target.value = "";
-                  setAvatarFile(null);
-                  return;
-                }
-                setError(null);
-                setAvatarFile(file);
-              }}
-            />
-            <span className="entry-form__hint">Maksimum 5MB. JPG, PNG veya GIF önerilir.</span>
-            {avatarFile && (
-              <span className="entry-form__file">Seçilen dosya: {avatarFile.name}</span>
+          <div className="entry-form__file-row">
+            <label className="entry-form__field entry-form__field--file">
+              Avatar yükle (opsiyonel)
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  if (file && file.size > MAX_FILE_SIZE) {
+                    setError("Avatar dosyası 5MB'den küçük olmalıdır.");
+                    event.target.value = "";
+                    setAvatarFile(null);
+                    return;
+                  }
+                  setError(null);
+                  setAvatarFile(file);
+                }}
+              />
+              <span className="entry-form__hint">Maksimum 5MB. JPG, PNG veya GIF önerilir.</span>
+              {avatarFile && (
+                <span className="entry-form__file">Seçilen dosya: {avatarFile.name}</span>
+              )}
+            </label>
+            <button
+              className="entry-form__submit"
+              type="submit"
+              disabled={submitting || !clientToken}
+            >
+              {submitting ? "Ekleniyor..." : "Kelimeyi ekle"}
+            </button>
+          </div>
+        </div>
+        {(loading || error) && (
+          <div className="entry-form__status-row">
+            {loading && <p className="entry-form__status">Kelime evreni yükleniyor...</p>}
+            {error && (
+              <p className="entry-form__status entry-form__status--error">{error}</p>
             )}
-          </label>
-        </div>
-        <div className="entry-form__actions">
-          <button type="submit" disabled={submitting || !clientToken}>
-            {submitting ? "Ekleniyor..." : "Kelimeyi ekle"}
-          </button>
-          {loading && <p className="entry-form__status">Kelime evreni yükleniyor...</p>}
-          {error && <p className="entry-form__status entry-form__status--error">{error}</p>}
-        </div>
+          </div>
+        )}
       </form>
       <section className="atom-card">
         <div className="atom-scene">
@@ -332,7 +342,7 @@ export default function HomePage() {
             >
               <div className="word-node__content">
                 <span className="word-node__username">{word.username}</span>
-                <div className="word-node__avatar-row">
+                <div className="word-node__avatar-wrapper">
                   {word.avatar_url ? (
                     <img
                       className="word-avatar"
