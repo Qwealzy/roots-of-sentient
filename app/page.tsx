@@ -1,6 +1,7 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type WordRecord = {
   id: string;
@@ -19,6 +20,7 @@ type PositionedWord = WordRecord & {
 };
 
 const BASE_LAYER_CAPACITY = 3;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
 function calculatePositionedWords(words: WordRecord[]): {
   layers: number;
@@ -72,10 +74,12 @@ function ensureClientToken() {
 export default function HomePage() {
   const [words, setWords] = useState<WordRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ term: "", username: "", avatarUrl: "" });
+  const [form, setForm] = useState({ term: "", username: "" });
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [clientToken, setClientToken] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setClientToken(ensureClientToken());
@@ -117,22 +121,28 @@ export default function HomePage() {
     try {
       setSubmitting(true);
       setError(null);
+      const payload = new FormData();
+      payload.append("term", form.term);
+      payload.append("username", form.username);
+      payload.append("clientToken", clientToken);
+      if (avatarFile) {
+        payload.append("avatar", avatarFile);
+      }
+
       const response = await fetch("/api/words", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          term: form.term,
-          username: form.username,
-          avatarUrl: form.avatarUrl,
-          clientToken
-        })
+        body: payload
       });
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data?.error || "Kelime eklenemedi");
       }
       setWords((prev) => [...prev, data.word]);
-      setForm({ term: "", username: "", avatarUrl: "" });
+      setForm({ term: "", username: "" });
+      setAvatarFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } catch (err) {
       console.error(err);
       setError(err instanceof Error ? err.message : "Beklenmedik bir hata oluştu");
@@ -252,14 +262,31 @@ export default function HomePage() {
             />
           </label>
           <label>
-            Avatar bağlantısı (opsiyonel)
+            Avatar yükle (opsiyonel)
             <input
-              value={form.avatarUrl}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, avatarUrl: event.target.value }))
-              }
-              placeholder="https://..."
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                if (file && file.size > MAX_FILE_SIZE) {
+                  setError("Avatar dosyası 5MB'den küçük olmalıdır.");
+                  event.target.value = "";
+                  setAvatarFile(null);
+                  return;
+                }
+                setError(null);
+                setAvatarFile(file);
+              }}
             />
+            <span style={{ fontSize: "0.8rem", color: "#64748b" }}>
+              Maksimum 5MB. JPG, PNG veya GIF dosyaları önerilir.
+            </span>
+            {avatarFile && (
+              <span style={{ fontSize: "0.85rem", color: "#94a3b8" }}>
+                Seçilen dosya: {avatarFile.name}
+              </span>
+            )}
           </label>
           <button type="submit" disabled={submitting || !clientToken}>
             {submitting ? "Ekleniyor..." : "Kelimeyi ekle"}
