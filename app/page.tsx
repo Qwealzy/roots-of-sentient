@@ -272,7 +272,7 @@ export default function HomePage() {
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, username: event.target.value }))
               }
-              placeholder="How should we credit you?"
+              placeholder="@Username"
               maxLength={30}
               required
             />
