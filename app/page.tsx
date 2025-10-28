@@ -25,7 +25,7 @@ const BASE_LAYER_CAPACITY = 4;
 const BASE_LAYER_RADIUS = 120;
 const LAYER_RADIUS_STEP = 110;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ANGLE_OFFSET_DEGREES = -45;
+const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 
 function getLayerCapacity(layerIndex: number) {
   return BASE_LAYER_CAPACITY * 2 ** layerIndex;
@@ -67,8 +67,10 @@ function calculatePositionedWords(words: WordRecord[]): {
       occupied.get(word.layer_index)!.add(word.slot_index);
 
       const capacity = getLayerCapacity(word.layer_index);
-      const spacing = 360 / capacity;
-      const angle = -90 + spacing * word.slot_index + ANGLE_OFFSET_DEGREES;
+      const angle =
+        word.layer_index === 0
+          ? FIRST_LAYER_ANGLES[word.slot_index % FIRST_LAYER_ANGLES.length]
+          : (360 / capacity) * word.slot_index;
       const radius = BASE_LAYER_RADIUS + word.layer_index * LAYER_RADIUS_STEP;
 
       positioned.push({
@@ -96,8 +98,10 @@ function calculatePositionedWords(words: WordRecord[]): {
       occupied.get(layerIndex)!.add(slotIndex);
 
       const capacity = getLayerCapacity(layerIndex);
-      const spacing = 360 / capacity;
-      const angle = -90 + spacing * slotIndex + ANGLE_OFFSET_DEGREES;
+      const angle =
+        layerIndex === 0
+          ? FIRST_LAYER_ANGLES[slotIndex % FIRST_LAYER_ANGLES.length]
+          : (360 / capacity) * slotIndex;
       const radius = BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP;
 
       positioned.push({
