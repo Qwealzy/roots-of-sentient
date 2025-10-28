@@ -10,6 +10,8 @@ type WordRecord = {
   avatar_url: string | null;
   client_token: string;
   created_at: string;
+  layer_index: number | null;
+  slot_index: number | null;
 };
 
 type PositionedWord = WordRecord & {
@@ -24,43 +26,101 @@ const BASE_LAYER_RADIUS = 120;
 const LAYER_RADIUS_STEP = 110;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+function getLayerCapacity(layerIndex: number) {
+  return BASE_LAYER_CAPACITY * 2 ** layerIndex;
+}
+
+function findOpenSlot(occupied: Map<number, Set<number>>) {
+  let layerIndex = 0;
+
+  while (true) {
+    const capacity = getLayerCapacity(layerIndex);
+    const used = occupied.get(layerIndex) ?? new Set<number>();
+
+    for (let slotIndex = 0; slotIndex < capacity; slotIndex += 1) {
+      if (!used.has(slotIndex)) {
+        return { layerIndex, slotIndex };
+      }
+    }
+
+    layerIndex += 1;
+  }
+}
+
 function calculatePositionedWords(words: WordRecord[]): {
   layerRadii: number[];
   positioned: PositionedWord[];
 } {
+  const occupied = new Map<number, Set<number>>();
   const positioned: PositionedWord[] = [];
-  const remaining = [...words];
-  let layerIndex = 0;
-  let currentCapacity = BASE_LAYER_CAPACITY;
-  const layerRadii: number[] = [];
+  const fallback: WordRecord[] = [];
 
-  while (remaining.length > 0) {
-    const layerWords = remaining.splice(0, currentCapacity);
-    if (layerWords.length === 0) {
-      break;
+  for (const word of words) {
+    if (
+      typeof word.layer_index === "number" &&
+      typeof word.slot_index === "number"
+    ) {
+      if (!occupied.has(word.layer_index)) {
+        occupied.set(word.layer_index, new Set());
+      }
+      occupied.get(word.layer_index)!.add(word.slot_index);
+
+      const capacity = getLayerCapacity(word.layer_index);
+      const spacing = 360 / capacity;
+      const angle = -90 + spacing * word.slot_index;
+      const radius = BASE_LAYER_RADIUS + word.layer_index * LAYER_RADIUS_STEP;
+
+      positioned.push({
+        ...word,
+        layerIndex: word.layer_index,
+        slotIndex: word.slot_index,
+        angle,
+        radius
+      });
+    } else {
+      fallback.push(word);
     }
+  }
 
-    const radius = BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP;
-    layerRadii.push(radius);
+  if (fallback.length > 0) {
+    const sortedFallback = [...fallback].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at)
+    );
 
-    const count = layerWords.length;
-    const spacing = count > 0 ? 360 / count : 0;
-    const baseOffset = count > 0 ? -90 : 0;
+    for (const word of sortedFallback) {
+      const { layerIndex, slotIndex } = findOpenSlot(occupied);
+      if (!occupied.has(layerIndex)) {
+        occupied.set(layerIndex, new Set());
+      }
+      occupied.get(layerIndex)!.add(slotIndex);
 
-    layerWords.forEach((word, index) => {
-      const angle = count > 0 ? baseOffset + spacing * index : 0;
+      const capacity = getLayerCapacity(layerIndex);
+      const spacing = 360 / capacity;
+      const angle = -90 + spacing * slotIndex;
+      const radius = BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP;
 
       positioned.push({
         ...word,
         layerIndex,
-        slotIndex: index,
+        slotIndex,
         angle,
         radius
       });
-    });
-    layerIndex += 1;
-    currentCapacity *= 2;
+    }
   }
+
+  positioned.sort((a, b) => {
+    if (a.layerIndex !== b.layerIndex) {
+      return a.layerIndex - b.layerIndex;
+    }
+    return a.slotIndex - b.slotIndex;
+  });
+
+  const layerRadii = Array.from(
+    new Set(positioned.map((word) => word.layerIndex))
+  )
+    .sort((a, b) => a - b)
+    .map((layerIndex) => BASE_LAYER_RADIUS + layerIndex * LAYER_RADIUS_STEP);
 
   return {
     layerRadii,
