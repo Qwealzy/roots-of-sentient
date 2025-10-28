@@ -196,30 +196,20 @@ export default function HomePage() {
                 transform: `rotate(${word.angle}deg) translate(${word.radius}px) rotate(-${word.angle}deg)`
               }}
             >
-              {word.avatar_url ? (
-                <img src={word.avatar_url} alt={`${word.username} avatar`} />
-              ) : (
-                <div
-                  style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    background: "rgba(59, 130, 246, 0.35)",
-                    display: "grid",
-                    placeItems: "center",
-                    fontSize: "0.85rem",
-                    fontWeight: 700,
-                    border: "1px solid rgba(59, 130, 246, 0.5)"
-                  }}
-                >
-                  {word.username.slice(0, 1).toUpperCase()}
-                </div>
-              )}
-              <div>
-                <strong>{word.term}</strong>
-                <div>
-                  <span>{word.username}</span>
-                </div>
+              <div className="word-node__content">
+                <span className="word-node__username">{word.username}</span>
+                {word.avatar_url ? (
+                  <img
+                    className="word-avatar"
+                    src={word.avatar_url}
+                    alt={`${word.username} avatar`}
+                  />
+                ) : (
+                  <div className="word-avatar word-avatar--placeholder">
+                    {word.username.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <strong className="word-node__term">{word.term}</strong>
               </div>
               {word.client_token === clientToken && (
                 <button
