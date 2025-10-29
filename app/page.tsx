@@ -298,17 +298,37 @@ export default function HomePage() {
   return (
     <main>
       <header className="page-header">
-        <img
-          className="page-header__logo"
-          src={logoSrc}
-          alt="Roots of Sentient logo"
-          onError={() => {
-            if (logoSrc === "/logo.svg") {
-              setLogoSrc("/logo.png");
-            }
-          }}
-        />
-        <h1>Roots of Sentient</h1>
+        <div className="page-header__brand">
+          <img
+            className="page-header__logo"
+            src={logoSrc}
+            alt="Roots of Sentient logo"
+            onError={() => {
+              if (logoSrc === "/logo.svg") {
+                setLogoSrc("/logo.png");
+              }
+            }}
+          />
+          <h1>Roots of Sentient</h1>
+        </div>
+        <div className="page-header__author">
+          <span className="page-header__author-title">Made By Godsonits</span>
+          <div className="page-header__socials">
+            <a
+              className="page-header__icon-link"
+              href="https://x.com/GGodsonits"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Godsonits on X"
+            >
+              <img src="/twitter.svg" alt="X logo" />
+            </a>
+            <div className="page-header__discord">
+              <img src="/discord.svg" alt="Discord logo" />
+              <span>@godsonits</span>
+            </div>
+          </div>
+        </div>
       </header>
       <form className="entry-form" onSubmit={handleSubmit}>
         <div className="entry-form__grid">
@@ -381,7 +401,17 @@ export default function HomePage() {
       </form>
       <section className="atom-card">
         <div className="atom-scene">
-          <div className="central-core">Sentient</div>
+          <div className="central-core">
+            <img
+              src={logoSrc}
+              alt="Roots of Sentient logo"
+              onError={() => {
+                if (logoSrc === "/logo.svg") {
+                  setLogoSrc("/logo.png");
+                }
+              }}
+            />
+          </div>
           {layerRadii.map((radius, index) => (
             <div
               key={`layer-${index}`}
