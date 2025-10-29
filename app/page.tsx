@@ -22,12 +22,18 @@ type PositionedWord = WordRecord & {
 };
 
 const BASE_LAYER_CAPACITY = 4;
+const CUSTOM_LAYER_CAPACITIES: Record<number, number> = {
+  4: 32
+};
 const BASE_LAYER_RADIUS = 140;
 const LAYER_RADIUS_STEP = 130;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 
 function getLayerCapacity(layerIndex: number) {
+  if (layerIndex in CUSTOM_LAYER_CAPACITIES) {
+    return CUSTOM_LAYER_CAPACITIES[layerIndex];
+  }
   return BASE_LAYER_CAPACITY * 2 ** layerIndex;
 }
 
@@ -61,12 +67,22 @@ function calculatePositionedWords(words: WordRecord[]): {
       typeof word.layer_index === "number" &&
       typeof word.slot_index === "number"
     ) {
+      const capacity = getLayerCapacity(word.layer_index);
+
+      if (word.slot_index >= capacity) {
+        fallback.push({
+          ...word,
+          layer_index: null,
+          slot_index: null
+        });
+        continue;
+      }
+      
       if (!occupied.has(word.layer_index)) {
         occupied.set(word.layer_index, new Set());
       }
       occupied.get(word.layer_index)!.add(word.slot_index);
 
-      const capacity = getLayerCapacity(word.layer_index);
       const angle =
         word.layer_index === 0
           ? FIRST_LAYER_ANGLES[word.slot_index % FIRST_LAYER_ANGLES.length]
