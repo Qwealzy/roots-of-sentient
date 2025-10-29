@@ -154,6 +154,7 @@ export default function HomePage() {
   const [submitting, setSubmitting] = useState(false);
   const [clientToken, setClientToken] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [logoSrc, setLogoSrc] = useState("/logo.svg");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
@@ -255,8 +256,13 @@ export default function HomePage() {
       <header className="page-header">
         <img
           className="page-header__logo"
-          src="/logo.svg"
+          src={logoSrc}
           alt="Roots of Sentient logo"
+          onError={() => {
+            if (logoSrc === "/logo.svg") {
+              setLogoSrc("/logo.png");
+            }
+          }}
         />
         <h1>Roots of Sentient</h1>
       </header>
