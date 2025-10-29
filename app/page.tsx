@@ -34,8 +34,8 @@ const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 function getLayerCapacity(layerIndex: number) {
   if (layerIndex in CUSTOM_LAYER_CAPACITIES) {
     if (layerIndex > MAX_LAYER_INDEX) {
-    return 0;
-  }
+      return 0;
+    }
     return CUSTOM_LAYER_CAPACITIES[layerIndex];
   }
   return BASE_LAYER_CAPACITY * 2 ** layerIndex;
@@ -47,7 +47,7 @@ function findOpenSlot(occupied: Map<number, Set<number>>) {
     if (capacity === 0) {
       continue;
     }
-    
+
     const used = occupied.get(layerIndex) ?? new Set<number>();
 
     for (let slotIndex = 0; slotIndex < capacity; slotIndex += 1) {
@@ -56,7 +56,7 @@ function findOpenSlot(occupied: Map<number, Set<number>>) {
       }
     }
   }
-  
+
   return null;
 }
 
@@ -81,7 +81,7 @@ function calculatePositionedWords(words: WordRecord[]): {
         });
         continue;
       }
-      
+
       const capacity = getLayerCapacity(word.layer_index);
 
       if (capacity === 0 || word.slot_index >= capacity) {
@@ -92,7 +92,7 @@ function calculatePositionedWords(words: WordRecord[]): {
         });
         continue;
       }
-      
+
       if (!occupied.has(word.layer_index)) {
         occupied.set(word.layer_index, new Set());
       }
@@ -228,7 +228,7 @@ export default function HomePage() {
     }
     return words.some((word) => word.client_token === clientToken);
   }, [clientToken, words]);
-  
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.term.trim() || !form.username.trim()) {
@@ -341,6 +341,7 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
       <form className="entry-form" onSubmit={handleSubmit}>
         <div className="entry-form__grid">
           <label className="entry-form__field">
@@ -356,6 +357,7 @@ export default function HomePage() {
               required
             />
           </label>
+
           <label className="entry-form__field">
             Twitter Username
             <input
@@ -369,6 +371,7 @@ export default function HomePage() {
               required
             />
           </label>
+
           <div className="entry-form__file-row">
             <label className="entry-form__field entry-form__field--file">
               <span className="entry-form__field-label">Profile Picture (Optional)</span>
@@ -392,27 +395,31 @@ export default function HomePage() {
                 <span className="entry-form__file">Selected file: {avatarFile.name}</span>
               )}
             </label>
+
             <button
               className="entry-form__submit"
               type="submit"
-              disabled={submitting || !clientToken}
+              disabled={submitting || !clientToken || hasUserWord}
             >
               {submitting ? "Adding..." : "Add Word"}
             </button>
           </div>
         </div>
-        disabled={submitting || !clientToken || hasUserWord}
-          <div className="entry-form__status-row">
-            {loading && <p className="entry-form__status">Loading the word universe...</p>}
-            {error && (
-              <p className="entry-form__status entry-form__status--error">{error}</p>
-            )}
-            {hasUserWord && !error && (
-              <p className="entry-form__status">You have already contributed a word. Delete it to add a new one.</p>
-            )}
-          </div>
-        )}
+
+        {/* Status row (form'un içinde, grid'in dışında) */}
+        <div className="entry-form__status-row">
+          {loading && <p className="entry-form__status">Loading the word universe...</p>}
+          {error && (
+            <p className="entry-form__status entry-form__status--error">{error}</p>
+          )}
+          {hasUserWord && !error && (
+            <p className="entry-form__status">
+              You have already contributed a word. Delete it to add a new one.
+            </p>
+          )}
+        </div>
       </form>
+
       <section className="atom-card">
         <div className="atom-scene">
           <div className="central-core">
