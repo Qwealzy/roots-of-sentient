@@ -252,7 +252,14 @@ export default function HomePage() {
 
   return (
     <main>
-      <h1>Roots of Sentient</h1>
+      <header className="page-header">
+        <img
+          className="page-header__logo"
+          src="/logo.svg"
+          alt="Roots of Sentient logo"
+        />
+        <h1>Roots of Sentient</h1>
+      </header>
       <form className="entry-form" onSubmit={handleSubmit}>
         <div className="entry-form__grid">
           <label className="entry-form__field">
