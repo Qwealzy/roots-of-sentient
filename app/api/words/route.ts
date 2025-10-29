@@ -219,7 +219,7 @@ export async function POST(request: Request) {
 
   const { data: existingEntries, error: existingError } = await supabaseServerClient
     .from(TABLE)
-    .select("term, layer_index, slot_index");
+    .select("term, layer_index, slot_index, client_token");
 
   if (existingError) {
     console.error("Supabase mevcut pozisyonları çekerken hata", existingError);
@@ -238,6 +238,15 @@ export async function POST(request: Request) {
   ) {
     return NextResponse.json(
       { error: "This word already exists." },
+      { status: 409 }
+    );
+  }
+
+  if (
+    (existingEntries ?? []).some((entry) => entry.client_token === clientToken)
+  ) {
+    return NextResponse.json(
+      { error: "Her kullanıcı en fazla bir kelime ekleyebilir." },
       { status: 409 }
     );
   }
