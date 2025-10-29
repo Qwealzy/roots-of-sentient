@@ -222,10 +222,21 @@ export default function HomePage() {
     [words]
   );
 
+  const hasUserWord = useMemo(() => {
+    if (!clientToken) {
+      return false;
+    }
+    return words.some((word) => word.client_token === clientToken);
+  }, [clientToken, words]);
+  
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.term.trim() || !form.username.trim()) {
       setError("Word and username are required.");
+      return;
+    }
+    if (hasUserWord) {
+      setError("You have already added a word. Remove it to add another.");
       return;
     }
     const normalizedTerm = form.term.trim().toLocaleLowerCase("tr");
@@ -390,11 +401,14 @@ export default function HomePage() {
             </button>
           </div>
         </div>
-        {(loading || error) && (
+        disabled={submitting || !clientToken || hasUserWord}
           <div className="entry-form__status-row">
             {loading && <p className="entry-form__status">Loading the word universe...</p>}
             {error && (
               <p className="entry-form__status entry-form__status--error">{error}</p>
+            )}
+            {hasUserWord && !error && (
+              <p className="entry-form__status">You have already contributed a word. Delete it to add a new one.</p>
             )}
           </div>
         )}
