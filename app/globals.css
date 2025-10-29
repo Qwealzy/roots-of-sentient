@@ -296,8 +296,10 @@ button:not(:disabled):hover {
 
 .central-core img {
   width: 70%;
-  height: auto;
+  height: 70%;
   display: block;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .orbit-layer {
