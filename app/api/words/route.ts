@@ -6,6 +6,9 @@ const TABLE = "words";
 const AVATAR_BUCKET = "avatars";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const BASE_LAYER_CAPACITY = 4;
+const CUSTOM_LAYER_CAPACITIES: Record<number, number> = {
+  4: 32
+};
 
 type PositionEntry = {
   id?: string;
@@ -15,6 +18,9 @@ type PositionEntry = {
 };
 
 function getLayerCapacity(layerIndex: number) {
+ if (layerIndex in CUSTOM_LAYER_CAPACITIES) {
+    return CUSTOM_LAYER_CAPACITIES[layerIndex];
+  }
   return BASE_LAYER_CAPACITY * 2 ** layerIndex;
 }
 
@@ -26,6 +32,12 @@ function buildOccupiedMap(entries: PositionEntry[]) {
       typeof entry.layer_index === "number" &&
       typeof entry.slot_index === "number"
     ) {
+      const capacity = getLayerCapacity(entry.layer_index);
+
+      if (entry.slot_index >= capacity) {
+        continue;
+      }
+
       if (!occupied.has(entry.layer_index)) {
         occupied.set(entry.layer_index, new Set());
       }
@@ -75,6 +87,20 @@ export async function GET() {
   }
 
   const rows = (data ?? []).map((word) => ({ ...word }));
+  
+  for (const word of rows) {
+    if (
+      typeof word.layer_index === "number" &&
+      typeof word.slot_index === "number"
+    ) {
+      const capacity = getLayerCapacity(word.layer_index);
+
+      if (word.slot_index >= capacity) {
+        word.layer_index = null;
+        word.slot_index = null;
+      }
+    }
+  }
   const occupied = buildOccupiedMap(rows);
   const updates: Array<{ id: string; layer_index: number; slot_index: number }> = [];
 
