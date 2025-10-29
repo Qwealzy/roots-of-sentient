@@ -9,6 +9,7 @@ const BASE_LAYER_CAPACITY = 4;
 const CUSTOM_LAYER_CAPACITIES: Record<number, number> = {
   4: 32
 };
+const MAX_LAYER_INDEX = 4;
 
 type PositionEntry = {
   id?: string;
@@ -18,6 +19,9 @@ type PositionEntry = {
 };
 
 function getLayerCapacity(layerIndex: number) {
+  if (layerIndex > MAX_LAYER_INDEX) {
+    return 0;
+  }
  if (layerIndex in CUSTOM_LAYER_CAPACITIES) {
     return CUSTOM_LAYER_CAPACITIES[layerIndex];
   }
@@ -32,9 +36,12 @@ function buildOccupiedMap(entries: PositionEntry[]) {
       typeof entry.layer_index === "number" &&
       typeof entry.slot_index === "number"
     ) {
+      if (entry.layer_index > MAX_LAYER_INDEX) {
+        continue;
+      }
       const capacity = getLayerCapacity(entry.layer_index);
 
-      if (entry.slot_index >= capacity) {
+      if (capacity === 0 || entry.slot_index >= capacity) {
         continue;
       }
 
@@ -49,11 +56,13 @@ function buildOccupiedMap(entries: PositionEntry[]) {
 }
 
 function claimNextSlot(occupied: Map<number, Set<number>>) {
-  let layerIndex = 0;
-
-  while (true) {
+  for (let layerIndex = 0; layerIndex <= MAX_LAYER_INDEX; layerIndex += 1) {
     const capacity = getLayerCapacity(layerIndex);
 
+    if (capacity === 0) {
+      continue;
+    }
+    
     if (!occupied.has(layerIndex)) {
       occupied.set(layerIndex, new Set());
     }
@@ -66,9 +75,9 @@ function claimNextSlot(occupied: Map<number, Set<number>>) {
         return { layerIndex, slotIndex };
       }
     }
-
-    layerIndex += 1;
   }
+  
+  return null;
 }
 
 export async function GET() {
@@ -93,9 +102,14 @@ export async function GET() {
       typeof word.layer_index === "number" &&
       typeof word.slot_index === "number"
     ) {
+      if (word.layer_index > MAX_LAYER_INDEX) {
+        word.layer_index = null;
+        word.slot_index = null;
+        continue;
+      }
       const capacity = getLayerCapacity(word.layer_index);
 
-      if (word.slot_index >= capacity) {
+      if (capacity === 0 || word.slot_index >= capacity) {
         word.layer_index = null;
         word.slot_index = null;
       }
@@ -114,7 +128,13 @@ export async function GET() {
       (a.created_at ?? "").localeCompare(b.created_at ?? "")
     )
     .forEach((word) => {
-      const { layerIndex, slotIndex } = claimNextSlot(occupied);
+      const nextSlot = claimNextSlot(occupied);
+      if (!nextSlot) {
+        word.layer_index = null;
+        word.slot_index = null;
+        return;
+      }
+      const { layerIndex, slotIndex } = nextSlot;
       word.layer_index = layerIndex;
       word.slot_index = slotIndex;
       if (word.id) {
@@ -197,9 +217,9 @@ export async function POST(request: Request) {
     avatarPath = path;
   }
 
-  const { data: existingPositions, error: existingError } = await supabaseServerClient
+  const { data: existingEntries, error: existingError } = await supabaseServerClient
     .from(TABLE)
-    .select("layer_index, slot_index");
+    .select("term, layer_index, slot_index");
 
   if (existingError) {
     console.error("Supabase mevcut pozisyonları çekerken hata", existingError);
@@ -209,8 +229,30 @@ export async function POST(request: Request) {
     );
   }
 
-  const occupied = buildOccupiedMap(existingPositions ?? []);
-  const { layerIndex, slotIndex } = claimNextSlot(occupied);
+  const normalizedTerm = term.toLocaleLowerCase("tr");
+  if (
+    (existingEntries ?? []).some(
+      (entry) =>
+        (entry.term ?? "").trim().toLocaleLowerCase("tr") === normalizedTerm
+    )
+  ) {
+    return NextResponse.json(
+      { error: "Bu kelime zaten atom modelinde mevcut." },
+      { status: 409 }
+    );
+  }
+
+  const occupied = buildOccupiedMap(existingEntries ?? []);
+  const nextSlot = claimNextSlot(occupied);
+
+  if (!nextSlot) {
+    return NextResponse.json(
+      { error: "Atom modeli şu anda maksimum 5 katman ile dolu." },
+      { status: 409 }
+    );
+  }
+
+  const { layerIndex, slotIndex } = nextSlot;
 
   const { data, error } = await supabaseServerClient
     .from(TABLE)
