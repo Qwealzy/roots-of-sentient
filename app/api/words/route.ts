@@ -237,7 +237,7 @@ export async function POST(request: Request) {
     )
   ) {
     return NextResponse.json(
-      { error: "Bu kelime zaten atom modelinde mevcut." },
+      { error: "This word already exists." },
       { status: 409 }
     );
   }
@@ -247,7 +247,7 @@ export async function POST(request: Request) {
 
   if (!nextSlot) {
     return NextResponse.json(
-      { error: "Atom modeli şu anda maksimum 5 katman ile dolu." },
+      { error: "The atom model is finished, thanks for participating!" },
       { status: 409 }
     );
   }
