@@ -25,6 +25,7 @@ const BASE_LAYER_CAPACITY = 4;
 const CUSTOM_LAYER_CAPACITIES: Record<number, number> = {
   4: 32
 };
+const MAX_LAYER_INDEX = 4;
 const BASE_LAYER_RADIUS = 140;
 const LAYER_RADIUS_STEP = 130;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -32,16 +33,21 @@ const FIRST_LAYER_ANGLES = [45, 135, 225, 315];
 
 function getLayerCapacity(layerIndex: number) {
   if (layerIndex in CUSTOM_LAYER_CAPACITIES) {
+    if (layerIndex > MAX_LAYER_INDEX) {
+    return 0;
+  }
     return CUSTOM_LAYER_CAPACITIES[layerIndex];
   }
   return BASE_LAYER_CAPACITY * 2 ** layerIndex;
 }
 
 function findOpenSlot(occupied: Map<number, Set<number>>) {
-  let layerIndex = 0;
-
-  while (true) {
+  for (let layerIndex = 0; layerIndex <= MAX_LAYER_INDEX; layerIndex += 1) {
     const capacity = getLayerCapacity(layerIndex);
+    if (capacity === 0) {
+      continue;
+    }
+    
     const used = occupied.get(layerIndex) ?? new Set<number>();
 
     for (let slotIndex = 0; slotIndex < capacity; slotIndex += 1) {
@@ -49,9 +55,9 @@ function findOpenSlot(occupied: Map<number, Set<number>>) {
         return { layerIndex, slotIndex };
       }
     }
-
-    layerIndex += 1;
   }
+  
+  return null;
 }
 
 function calculatePositionedWords(words: WordRecord[]): {
@@ -67,9 +73,18 @@ function calculatePositionedWords(words: WordRecord[]): {
       typeof word.layer_index === "number" &&
       typeof word.slot_index === "number"
     ) {
+      if (word.layer_index > MAX_LAYER_INDEX) {
+        fallback.push({
+          ...word,
+          layer_index: null,
+          slot_index: null
+        });
+        continue;
+      }
+      
       const capacity = getLayerCapacity(word.layer_index);
 
-      if (word.slot_index >= capacity) {
+      if (capacity === 0 || word.slot_index >= capacity) {
         fallback.push({
           ...word,
           layer_index: null,
@@ -107,7 +122,11 @@ function calculatePositionedWords(words: WordRecord[]): {
     );
 
     for (const word of sortedFallback) {
-      const { layerIndex, slotIndex } = findOpenSlot(occupied);
+      const nextSlot = findOpenSlot(occupied);
+      if (!nextSlot) {
+        break;
+      }
+      const { layerIndex, slotIndex } = nextSlot;
       if (!occupied.has(layerIndex)) {
         occupied.set(layerIndex, new Set());
       }
@@ -209,6 +228,15 @@ export default function HomePage() {
       setError("Word and username are required.");
       return;
     }
+    const normalizedTerm = form.term.trim().toLocaleLowerCase("tr");
+    if (
+      words.some(
+        (word) => word.term.trim().toLocaleLowerCase("tr") === normalizedTerm
+      )
+    ) {
+      setError("This word has already been added to the atom.");
+      return;
+    }
     if (!clientToken) {
       setError("Please wait while a browser token is prepared.");
       return;
@@ -288,7 +316,10 @@ export default function HomePage() {
             Word
             <input
               value={form.term}
-              onChange={(event) => setForm((prev) => ({ ...prev, term: event.target.value }))}
+              onChange={(event) => {
+                setForm((prev) => ({ ...prev, term: event.target.value }));
+                setError(null);
+              }}
               placeholder="Enter your word"
               maxLength={30}
               required
@@ -298,9 +329,10 @@ export default function HomePage() {
             Twitter Username
             <input
               value={form.username}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, username: event.target.value }))
-              }
+              onChange={(event) => {
+                setForm((prev) => ({ ...prev, username: event.target.value }));
+                setError(null);
+              }}
               placeholder="@Username"
               maxLength={30}
               required
