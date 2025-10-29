@@ -76,7 +76,7 @@ h1 {
 }
 
 .atom-card {
-  margin-top: clamp(7rem, 20vw, 16rem);
+  margin-top: clamp(9rem, 23vw, 18rem);
   padding: 0;
   display: flex;
   justify-content: center;
