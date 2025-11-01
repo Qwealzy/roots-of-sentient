@@ -22,7 +22,7 @@ function getLayerCapacity(layerIndex: number) {
   if (layerIndex > MAX_LAYER_INDEX) {
     return 0;
   }
- if (layerIndex in CUSTOM_LAYER_CAPACITIES) {
+  if (layerIndex in CUSTOM_LAYER_CAPACITIES) {
     return CUSTOM_LAYER_CAPACITIES[layerIndex];
   }
   return BASE_LAYER_CAPACITY * 2 ** layerIndex;
