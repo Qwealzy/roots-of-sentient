@@ -23,7 +23,7 @@ type PositionedWord = WordRecord & {
 
 const BASE_LAYER_CAPACITY = 4;
 const CUSTOM_LAYER_CAPACITIES: Record<number, number> = {
-  4: 24
+  3: 24
 };
 const MAX_LAYER_INDEX = 4;
 const BASE_LAYER_RADIUS = 140;
