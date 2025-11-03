@@ -25,7 +25,7 @@ const BASE_LAYER_CAPACITY = 4;
 const CUSTOM_LAYER_CAPACITIES: Record<number, number> = {
   3: 24
 };
-const MAX_LAYER_INDEX = 4;
+const MAX_LAYER_INDEX = 3;
 const BASE_LAYER_RADIUS = 140;
 const LAYER_RADIUS_STEP = 130;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
