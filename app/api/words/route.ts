@@ -7,7 +7,8 @@ const AVATAR_BUCKET = "avatars";
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const BASE_LAYER_CAPACITY = 4;
 const CUSTOM_LAYER_CAPACITIES: Record<number, number> = {
-  3: 24
+  3: 24,
+  4: 24
 };
 const MAX_LAYER_INDEX = 4;
 
